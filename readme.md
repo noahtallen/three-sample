@@ -4,6 +4,9 @@ This solution incorporates both parts 1 and 2 from the problem set. I decided to
 
 The starter code for this project is found on Dr. Dailey's site [1], but this code has been heavily modified to support my own unique solution to the problem.
 
+## Instructions:
+Open the `index.html` file and click "Start Making Birds". You can change the y-axis rotation function as well as the rate of bird generation. You can also move around using keyboard controls. Click "Stop Making Birds" and move around the scene and check out the state of the frozen birds!
+
 ### Part 1 - Cloning
 I decided to use both a timer and randomization to clone objects. I created a few helper functions:
 
