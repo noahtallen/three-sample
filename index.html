@@ -1,0 +1,264 @@
+<html><head>
+    <title>Cloning Objects</title>
+    <style>
+        html { margin: 0; }
+        body { margin: 0; }
+        canvas {
+            height: 100% !important;
+            width: calc(100% - 300px) !important;
+            float: left;
+        }
+        #content {
+            margin: 0;
+            box-sizing: border-box;
+            height: 100%;
+            width: 300px;
+            float: right;
+            padding: 10px;
+            background-color: lightgray;
+            border-left: 1px solid black;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: monospace;
+        }
+        .elem {
+            width: 170px;
+            height: 25px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: black;
+            color: white;
+            border-radius: 5px;
+            border: none;
+        }
+        button:hover {
+            background-color: darkslategray;
+        }
+        input {
+            border-radius: 5px;
+            border: none;
+            padding-left: 10px;
+        }
+        .pos-title {
+            margin-top: auto;
+            margin-bottom: 5px;
+        }
+        .title-top {
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+        #position-display {
+            background-color: darkgray;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+            align-items: center;
+            border-radius: 10px;
+        }
+        #position-display span {
+            color: black;
+            font-size: 1.3em;
+            font-weight: bolder;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id='content'>
+        <button id='startstop' class='elem' onclick="toggleStartStop()">Start Making Birds</button>
+        <span class='title-top'>Function which takes n (if n = 100, this was the 100th bird created) and returns a value by which the y-rotation is incremented in the animation:</span>
+        <input class='elem' id='rotationFunc' type='text' placeholder="0.5/Math.sqrt(n)">
+        <button id='updateBttn' onclick="updatePower()" class='elem'>Update Function</button>
+
+        <span class='title-top'>Create birds at this interval:</span>
+        <input class='elem' id='updateInterval' type='text' placeholder="1">
+        <button id='intervalBttn' onclick="updateInterval()" class='elem'>Update Interval</button>
+        <span class='title-top'>Use keyboard controls "w/s a/d q/e" to move "forward/back left/right up/down"</span>
+
+        <span class='pos-title'>Camera position (x, y, z)</span>
+        <div id='position-display' class='elem'>
+            <span id='pos-x'>0</span>
+            <span id='pos-y'>0</span>
+            <span id='pos-z'>0</span>
+        </div>
+    </div>
+<script src="http://threejs.org/build/three.min.js"></script>
+<script>
+    // --- Define Initial Variables --- //
+    var interval = 1000
+    var shouldGenerate = false
+    var birds = []
+    var currentBird = 0
+    var rotationFunction = (n) => 0.5/Math.sqrt(n)
+    document.onkeydown = checkKeyInput
+
+    // --- Setup initial THREE things --- //
+    var renderer = new THREE.WebGLRenderer()
+    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 1, 1000 )
+    var scene = new THREE.Scene()
+    var light0 = new THREE.PointLight(0xffffff, 1)
+    light0.position.set(0, 2, 7)
+    scene.add(light0)
+
+    // --- Setup renderer --- //
+    renderer.setSize( window.innerWidth, window.innerHeight )
+    renderer.setClearColor(0xffffff)
+    document.body.appendChild( renderer.domElement )
+
+    // --- Setup initial bird --- //
+    var geom = new THREE.Geometry()
+
+    var v0 = new THREE.Vector3(-15,0,0)
+    var v1 = new THREE.Vector3(-5,10,0)
+    var v2 = new THREE.Vector3(0,5,-10)
+    var v3 = new THREE.Vector3(5,0,0)
+    var v4 = new THREE.Vector3(15,10,0)
+    var v5 = new THREE.Vector3(25,0,-10)
+    
+    geom.vertices.push(v0)
+    geom.vertices.push(v1)
+    geom.vertices.push(v2)
+    geom.vertices.push(v3)
+    geom.vertices.push(v4)
+    geom.vertices.push(v5)
+    
+    geom.faces.push( new THREE.Face3( 0, 1, 2 ) )
+    geom.faces.push( new THREE.Face3( 1, 3, 2 ) )
+    geom.faces.push( new THREE.Face3( 4, 3, 2 ) )
+    geom.faces.push( new THREE.Face3( 4, 5, 2 ) )
+    geom.computeFaceNormals()
+    
+    material = new THREE.MeshLambertMaterial({ vertexColors: THREE.FaceColors, side: THREE.DoubleSide }) 
+    bird1 = new THREE.Mesh( geom, material)
+    bird1.position.set(0, 0, -80)
+    bird1.geometry.applyMatrix(new THREE.Matrix4().makeTranslation(20, 0, 0 ) )
+
+    // Now that we have the bird, add it to the initial index of the array, but NOT to the scene.
+    birds.push(bird1)
+
+    // --- Start loops --- //
+    newBirdyLoop()
+
+    var render = function () {
+        requestAnimationFrame(render)
+        // Rotate all birds in the array:
+        if (shouldGenerate) {
+            for (var i = 0; i < birds.length; i++) {
+                birds[i].rotation.y += rotationFunction(i)
+                birds[i].rotation.z += 0.02
+            }
+        }
+        renderer.render(scene, camera)
+    }
+    render()
+
+    // Recursively generate new birds after a timeout
+    function newBirdyLoop () {
+        if (shouldGenerate) {
+            newBirdy()
+            setTimeout(function() {
+                newBirdyLoop() 
+            }, interval)
+        }
+    }
+
+    // Generates a new birdy based on the last one - color and position are randomized:
+    function newBirdy () {
+        var newBird = birds[currentBird].clone()
+        var z = Math.floor(Math.random() * 200) - 400
+        // Calculates what x/y coordinate the bird should be at considering
+        // the FOV of the camra and the depth of the object in the scene:
+        var screenWidth = visibleWidthAtZDepth(z, camera)
+        var screenHeight = visibleHeightAtZDepth(z, camera)
+        // Randomize where in the FOV the object should apper:
+        var x = Math.floor(Math.random() * screenWidth) - screenWidth/2
+        var y = Math.floor(Math.random() * screenHeight) - screenHeight/2
+        newBird.position.set(x, y, z)
+        var newMaterial = birds[currentBird].material.clone()
+        newMaterial.color.setRGB(Math.random(), Math.random(), Math.random())
+        newBird.material = newMaterial;
+        birds.push(newBird)
+        currentBird++
+        scene.add(newBird)
+    }
+    
+    // Function from here: https://discourse.threejs.org/t/functions-to-calculate-the-visible-width-height-at-a-given-z-depth-from-a-perspective-camera/269
+    function visibleHeightAtZDepth (depth, camera) {
+        // compensate for cameras not positioned at z=0
+        const cameraOffset = camera.position.z
+        if ( depth < cameraOffset ) depth -= cameraOffset
+        else depth += cameraOffset
+
+        // vertical fov in radians
+        const vFOV = camera.fov * Math.PI / 180
+
+        // Math.abs to ensure the result is always positive
+        return 2 * Math.tan( vFOV / 2 ) * Math.abs( depth )
+    }
+
+    // Function from here: https://discourse.threejs.org/t/functions-to-calculate-the-visible-width-height-at-a-given-z-depth-from-a-perspective-camera/269
+    function visibleWidthAtZDepth (depth, camera) {
+        const height = visibleHeightAtZDepth( depth, camera )
+        return height * camera.aspect
+    }
+
+    // Starts/Stops the rendering of birds:
+    function toggleStartStop (e) {
+        var bttn = document.getElementById('startstop')
+        if (bttn.innerHTML === 'Start Making Birds') {
+            bttn.innerHTML = 'Stop Making Birds'
+            shouldGenerate = true
+            newBirdyLoop()
+        } else {
+            bttn.innerHTML = 'Start Making Birds'
+            shouldGenerate = false
+        }
+    }
+
+    // Updates the function for y-rotation:
+    function updatePower (e) {
+        var input = document.getElementById('rotationFunc').value
+        rotationFunction = new Function('n', 'return ' + input)
+    }
+    
+    // Update the interval at which birds are created:
+    function updateInterval (e) {
+        var input = document.getElementById('updateInterval')
+        var number = input.value
+        interval = parseFloat(input.value) * 1000
+    }
+
+    // Move the camera around:
+    function checkKeyInput (e) {
+        if (e.keyCode == '81') { // q
+            camera.position.y += 5
+            updatePos(camera.position.y, 'y')
+        } else if (e.keyCode == '69') { // e
+            camera.position.y -= 5
+            updatePos(camera.position.y, 'y')
+        } else if (e.keyCode == '87') { // w
+            camera.position.z -= 10
+            updatePos(camera.position.z, 'z')
+        } else if (e.keyCode == '83') { // s
+            camera.position.z += 10
+            updatePos(camera.position.z, 'z')
+        } else if (e.keyCode == '65') { // a
+            camera.position.x -= 5
+            updatePos(camera.position.x, 'x')
+        } else if (e.keyCode == '68') { // d
+            camera.position.x += 5
+            updatePos(camera.position.x, 'x')
+        }
+    }
+
+    // Helper function to update the camera position numbers
+    // on-screen. Num can be any number, dir is one of "x, y, z"
+    function updatePos (num, dir) {
+        document.getElementById('pos-' + dir).innerHTML = num
+    }
+
+</script>
+</body></html>
