@@ -1,5 +1,5 @@
 ## Description
-This solution incorporates both parts 1 and 2 from the problem set. I decided to solve the "cloning objects" exercise, as well as incporporate interactivity with the scene.
+This solution incorporates both parts 1 and 2 from the problem set. I decided to solve the "cloning objects" exercise, as well as incorporate  interactivity with the scene.
 
 The starter code for this project is found on Dr. Dailey's site [1], but this code has been heavily modified to support my own unique solution to the problem. I mostly just kept the original bird generation and structure and used my own logic for doing the rest.
 
