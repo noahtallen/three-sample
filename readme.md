@@ -1,13 +1,12 @@
-## Description:
-
+## Description
 This solution incorporates both parts 1 and 2 from the problem set. I decided to solve the "cloning objects" exercise, as well as incporporate interactivity with the scene.
 
 The starter code for this project is found on Dr. Dailey's site [1], but this code has been heavily modified to support my own unique solution to the problem. I mostly just kept the original bird generation and structure and used my own logic for doing the rest.
 
-## Instructions:
+## Instructions
 Open the `index.html` file and click "Start Making Birds". You can change the y-axis rotation function as well as the rate of bird generation. You can also move around using keyboard controls. Click "Stop Making Birds" and move around the scene and check out the state of the frozen birds!
 
-### Part 1 - Cloning
+## Part 1 - Cloning
 I decided to use both a timer and randomization to clone objects. I created a few helper functions:
 
 1) A loop that clones a bird, sets a timeout, then clones another bird
@@ -18,7 +17,7 @@ To actually solve the cloning, after the initial bird is created, I pushed it in
 
 I modified the render code to animate each bird in the array. I loop through the array, and update the birds rotation position. To make it interesting, the `z` component is incremented by `0.02` every time, but the `y` component is dynamic. Essentially, I created a function which can take the index of the bird in the array, and use that index number to generate a dynamic rotation value depending on the index. I first set this function to `(n) => 0.5 / Math.sqrt(n)`. This allows each bird to rotate differently than the others. The first one rotates quickly, but later ones rotate much more slowly.
 
-### Part 2 - Interactivity
+## Part 2 - Interactivity
 I added interactivity in several ways.
 
 1) Allowed the user to define the rotation function for the `y` component of rotation.
