@@ -4,6 +4,9 @@
         html { margin: 0; }
         body { margin: 0; }
         canvas {
+            /* Needed to use important to override default size
+            of the renderer. This lets it sit beside the sidebar
+            and not underneath of it. */
             height: 100% !important;
             width: calc(100% - 300px) !important;
             float: left;
