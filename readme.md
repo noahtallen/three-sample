@@ -27,6 +27,8 @@ I added interactivity in several ways.
 
 I accomplished this using a `new Function()` constructor to allow user input to be transformed into executable javascript code. I also allowed the user to input a number of seconds between bird creations which then became set in the timeout function. I also implemented basic navigation using keyboard controls and then updated the camera's position. The start/stop button sets a boolean which gets checked in the timeout/generator function.
 
+I also created a sidebar to show important information to the user. For instance, I allow the user to change things about the bird generation there, and also show the camera position at the bottom. I also put important instructions there so that the user knows how to use the site.
+
 [1] http://srufaculty.sru.edu/david.dailey/cs456/ThreeJS1p.html
 
 [2] https://discourse.threejs.org/t/functions-to-calculate-the-visible-width-height-at-a-given-z-depth-from-a-perspective-camera/269
